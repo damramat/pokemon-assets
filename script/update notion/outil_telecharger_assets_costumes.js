@@ -24,7 +24,7 @@ if (!GOOGLE_SHEET_ID || !GOOGLE_APPLICATION_CREDENTIALS) {
 // ============================
 // OUTPUT DIR
 // ============================
-const OUTPUT_DIR = path.resolve(__dirname, "../assets/costumes");
+const OUTPUT_DIR = path.resolve(__dirname, "../assets/costumes2");
 fs.mkdirSync(OUTPUT_DIR, { recursive: true });
 
 const limit = pLimit(Number(CONCURRENCY));
@@ -81,8 +81,8 @@ const downloadAndNormalizeImage = async (url) => {
 
   await sharp(buffer)
     .resize(256, 256, {
-      fit: "contain",
-      background: { r: 0, g: 0, b: 0, alpha: 0 },
+      fit: "cover",
+      position: "centre", // centre par défaut, explicite
     })
     .png()
     .toFile(outputPath);
@@ -98,7 +98,7 @@ async function main() {
 
   const res = await sheets.spreadsheets.values.get({
     spreadsheetId: GOOGLE_SHEET_ID,
-    range: "Costumes!H2:H",
+    range: "Costumes!F2:F",
   });
 
   const urls = (res.data.values || [])

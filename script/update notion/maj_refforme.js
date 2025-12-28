@@ -48,6 +48,61 @@ const notionLimit = pLimit(NOTION_CONCURRENCY);
 // =====================================================
 // HELPERS
 // =====================================================
+
+// =====================================================
+// CACHE RefForme Notion (Id -> page_id)
+// =====================================================
+const refFormeById = new Map();
+
+async function loadRefFormeCache() {
+  console.log("📦 Chargement cache RefForme (Id → page_id)");
+
+  let cursor = undefined;
+
+  do {
+    const res = await notion.databases.query({
+      database_id: NOTION_DB_REF_FORME,
+      start_cursor: cursor,
+      page_size: 100,
+    });
+
+    res.results.forEach((page) => {
+      const idProp = page.properties?.Id;
+      if (idProp?.type === "number" && idProp.number !== null) {
+        refFormeById.set(String(idProp.number), page.id);
+      }
+    });
+
+    cursor = res.has_more ? res.next_cursor : undefined;
+  } while (cursor);
+
+  console.log(`✅ Cache RefForme chargé (${refFormeById.size} pages)`);
+}
+
+function buildEvolutionsRelation(ligne, rowNum) {
+  const raw = (ligne.evol_ids || "").toString().trim();
+  if (!raw) return null;
+
+  const relations = [];
+
+  raw.split(",").map((s) => s.trim()).forEach((evolId) => {
+    const pageId = refFormeById.get(evolId);
+
+    if (!pageId) {
+      console.error(
+        `⚠️ [EVOL NOT FOUND] L${rowNum} → evol_id=${evolId} (aucune page RefForme avec Id=${evolId})`
+      );
+      return;
+    }
+
+    relations.push({ id: pageId });
+  });
+
+  if (!relations.length) return null;
+
+  return { relation: relations };
+}
+
 const sha256 = (t) => crypto.createHash("sha256").update(t).digest("hex");
 
 const yesNoVersBool = (v) =>
@@ -207,6 +262,8 @@ function buildProps(ligne) {
       ],
     };
   }
+  
+  // ⚠️ Évolutions gérées ailleurs (nécessite le cache)
 
   return p;
 }
@@ -244,6 +301,7 @@ async function main() {
 
   let created = 0, updated = 0, skipped = 0;
   const nowIso = new Date().toISOString();
+  await loadRefFormeCache();
 
   await Promise.all(
     rows.map((r, i) =>
@@ -265,6 +323,15 @@ async function main() {
         }
 
         const props = buildProps(ligne);
+		
+		// ============================
+		// ÉVOLUTIONS (relation RefForme)
+		// ============================
+		const evolRelation = buildEvolutionsRelation(ligne, rowNum);
+		if (evolRelation) {
+		  props["Évolutions"] = evolRelation;
+		}
+
         const icon = buildIcon(ligne);
 
         try {
