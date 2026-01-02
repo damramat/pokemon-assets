@@ -50,6 +50,39 @@ const notionLimit = pLimit(NOTION_CONCURRENCY);
 // =====================================================
 
 // =====================================================
+// CACHE RefEspece Notion (NumeroDex -> page_id)
+// =====================================================
+const refEspeceByNumeroDex = new Map();
+
+async function loadRefEspeceCache() {
+  console.log("📦 Chargement cache RefEspece (NumeroDex → page_id)");
+
+  let cursor;
+
+  do {
+    const res = await notion.databases.query({
+      database_id: NOTION_DB_REF_ESPECE,
+      start_cursor: cursor,
+      page_size: 100,
+    });
+
+    res.results.forEach((page) => {
+      const dexProp = page.properties?.NumeroDex;
+      if (dexProp?.type === "number" && dexProp.number !== null) {
+        refEspeceByNumeroDex.set(
+          String(dexProp.number),
+          page.id
+        );
+      }
+    });
+
+    cursor = res.has_more ? res.next_cursor : undefined;
+  } while (cursor);
+
+  console.log(`✅ Cache RefEspece chargé (${refEspeceByNumeroDex.size} pages)`);
+}
+
+// =====================================================
 // CACHE RefForme Notion (Id -> page_id)
 // =====================================================
 const refFormeById = new Map();
@@ -302,6 +335,7 @@ async function main() {
   let created = 0, updated = 0, skipped = 0;
   const nowIso = new Date().toISOString();
   await loadRefFormeCache();
+  await loadRefEspeceCache();
 
   await Promise.all(
     rows.map((r, i) =>
@@ -331,6 +365,24 @@ async function main() {
 		if (evolRelation) {
 		  props["Évolutions"] = evolRelation;
 		}
+		
+		// ============================
+        // REF ESPECE (relation via NumeroDex)
+        // ============================
+        const numeroDex = parseNumber(ligne.NumeroDex);
+        if (numeroDex !== null) {
+          const especePageId = refEspeceByNumeroDex.get(String(numeroDex));
+        
+          if (!especePageId) {
+            console.error(
+              `⚠️ [REF ESPECE NOT FOUND] L${rowNum} → NumeroDex=${numeroDex}`
+            );
+          } else {
+            props["RefEspece"] = {
+              relation: [{ id: especePageId }],
+            };
+          }
+        }
 
         const icon = buildIcon(ligne);
 
