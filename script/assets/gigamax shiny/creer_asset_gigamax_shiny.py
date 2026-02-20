@@ -1,7 +1,7 @@
 import os
 from PIL import Image
 
-INPUT_DIR = "../shiny/result/"
+INPUT_DIR = "assets_a_traiter"
 OUTPUT_DIR = "result_gigamax/"
 LOGO_PATH = "gigamax_logo.png"
 
@@ -16,8 +16,9 @@ def is_allowed_file(filename: str) -> bool:
         return False
 
     # On traite uniquement les fichiers contenant 'GIGANTAMAX'
-    return "gigantamax" in filename.lower()
+    #return "gigantamax" in filename.lower()
 
+    return True
 
 def generate_gigamax(pokemon_path: str, output_path: str, logo: Image.Image):
     """Génère l'image Gigamax pour un fichier donné."""
