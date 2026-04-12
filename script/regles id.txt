@@ -1,0 +1,89 @@
+REF_FORME :
+-----------
+
+ID = 143 000
+
+	NuméroDex : 143
+		+
+	Forme normale : 	000
+	Forme Variante : 	001 à 049
+	Forme Régionale : 	050 à 059
+	Forme Genrée : 		060 à 069
+	Forme Primo :		070 à 079
+	Forme Méga :		080 à 089
+	Forme Gigamax : 	090 à 094
+	Forme Infinimax :	095
+	Forme Costume :		100 à 299
+	
+	
+const FORME_INDEX_MAP = {
+	"": [0, 0],            // Normal
+	"Variante": [1, 49],
+	"Régionale": [50, 59],
+	"Genre": [60, 69],
+	"Primo": [70, 79],
+	"Méga": [80, 89],
+	"Gigamax": [90, 94],
+	"Infinimax": [95, 95],
+	"Costume": [100, 299],
+};
+
+
+
+
+REF_POKEMON :
+-------------
+
+ID = 143 000 00 Ronflex
+
+	NuméroDex : 143
+		+
+	Forme : 000 à 999
+		+
+	Etat Normal : 				00
+	Etat Shiny : 				01
+	Etat Obscur : 				02
+	Etat Obscur Shiny : 		03
+	Etat Purifié : 				04
+	Etat Purifié Shiny : 		05
+	Etat Dynamax : 				06
+	Etat Dynamax Shiny : 		07
+	Etat XXS : 					08
+	Etat XXS Shiny : 			09
+	Etat XXL : 					10
+	Etat XXL Shiny : 			11
+	Etat Chanceux : 			12
+	Etat Chanceux Shiny : 		13
+	Etat 100% : 				14
+	Etat 100% Shiny : 			15
+	Etat 100% Dynamax : 		16
+	Etat 100% Dynamax Shiny :	17
+	
+	Etat Fond :					50 à 89
+	
+	Etat Apex :					90
+	Etat Apex Obscur :			91
+	
+	
+const ETAT_INDEX_MAP = {
+	0: ["Normal"],
+	1: ["Shiny"],
+	2: ["Obscur"],
+	3: ["Obscur", "Shiny"],
+	4: ["Purifié"],
+	5: ["Purifié", "Shiny"],
+	6: ["Dynamax"],
+	7: ["Dynamax", "Shiny"],
+	8: ["XXS"],
+	9: ["XXS", "Shiny"],
+	10: ["XXL"],
+	11: ["XXL", "Shiny"],
+	12: ["Chanceux"],
+	13: ["Chanceux", "Shiny"],
+	14: ["100%"],
+	15: ["100%", "Shiny"],
+	16: ["100%", "Dynamax"],
+	17: ["100%", "Dynamax", "Shiny"],
+	90: ["Apex"],
+	91: ["Apex", "Obscur"],
+};
